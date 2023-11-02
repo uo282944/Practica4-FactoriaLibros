@@ -30,9 +30,7 @@ public abstract class Parser {
                 String line;
                 // Leer el archivo línea por línea
                 while ((line = bufferedReader.readLine()) != null) {
-                    System.out.println("LINE = " + line);
                     String[] bookData = line.split(SEPARATOR);
-                    System.out.println(bookData.toString());
                     books.add(createBook(bookData));
                 }
                 bufferedReader.close();

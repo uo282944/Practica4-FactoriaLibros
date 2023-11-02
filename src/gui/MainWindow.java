@@ -2,10 +2,18 @@ package gui;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -25,6 +33,9 @@ import parse.InfantilParser;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
+import javax.swing.SwingConstants;
+import javax.swing.JTextArea;
+import java.awt.Toolkit;
 
 public class MainWindow extends JFrame {
 
@@ -44,7 +55,7 @@ public class MainWindow extends JFrame {
 	private JLabel lblTituloFisico;
 	private JPanel panelEBook;
 	private JLabel lblTituloEbook;
-	
+
 	private Cliente cliente;
 	private JButton btnAtras;
 	private JLabel lblEBook;
@@ -61,6 +72,16 @@ public class MainWindow extends JFrame {
 	private JLabel lblNiño;
 	private JButton btnSiguienteSelLibro;
 	private JButton btnAtrasSelLibro;
+	private JLabel lblAutorEbook;
+	private JButton btnOtroLibro;
+	private JTextArea textAreaTexto;
+	private JLabel lblAutorBook;
+	private JButton btnOtroLibroBook;
+	private JLabel lblLink;
+	private JLabel lblNombreAplicacion;
+	private JLabel lblFondo;
+	private JLabel lblEdadRecomendadaEbook;
+	private JLabel lblEdadRecomendadaFisico;
 
 	/**
 	 * Launch the application.
@@ -82,8 +103,9 @@ public class MainWindow extends JFrame {
 	 * Create the frame.
 	 */
 	public MainWindow() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/gui/img/libro.png")));
 		cliente = new Cliente();
-		
+
 		setTitle("Visualizador de libros");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -108,12 +130,16 @@ public class MainWindow extends JFrame {
 			panelSeleccionTema.add(getBtnTemaClaro());
 			panelSeleccionTema.add(getBtnTemaOscuro());
 			panelSeleccionTema.add(getLblTema());
+			panelSeleccionTema.add(getLblNombreAplicacion());
+			panelSeleccionTema.add(getLblFondo());
 		}
 		return panelSeleccionTema;
 	}
+
 	private JButton getBtnTemaClaro() {
 		if (btnTemaClaro == null) {
-			btnTemaClaro = new JButton("Tema Claro");
+			btnTemaClaro = new JButton("Claro");
+			btnTemaClaro.setFocusable(false);
 			btnTemaClaro.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					cliente.setAif(new LightThemeFactory());
@@ -122,33 +148,34 @@ public class MainWindow extends JFrame {
 				}
 			});
 			btnTemaClaro.setFont(new Font("Tahoma", Font.BOLD, 25));
-			btnTemaClaro.setBackground(Color.BLUE);
+			btnTemaClaro.setBackground(new Color(238, 232, 170));
 			btnTemaClaro.setForeground(Color.BLACK);
-			btnTemaClaro.setBounds(44, 168, 330, 85);
+			btnTemaClaro.setBounds(71, 239, 126, 111);
 		}
 		return btnTemaClaro;
 	}
-	
+
 	private void cambiarFondoYBotones(JPanel panel) {
 		panel.setBackground(cliente.getAif().colorFondo().getColorFondo());
-		for (int i = 0;i< panel.getComponents().length;i++) {
+		for (int i = 0; i < panel.getComponents().length; i++) {
 			if (panel.getComponent(i) instanceof JButton) {
-				((JButton)panel.getComponent(i)).setBackground(cliente.getAif().colorBoton().getColorFondoBoton());
-				((JButton)panel.getComponent(i)).setForeground(cliente.getAif().colorBoton().getColorLetras());
-			}else if(panel.getComponent(i) instanceof JLabel){
-				((JLabel)panel.getComponent(i)).setForeground(cliente.getAif().colorEtiqueta().getColorLetras());
+				((JButton) panel.getComponent(i)).setBackground(cliente.getAif().colorBoton().getColorFondoBoton());
+				((JButton) panel.getComponent(i)).setForeground(cliente.getAif().colorBoton().getColorLetras());
+			} else if (panel.getComponent(i) instanceof JLabel) {
+				((JLabel) panel.getComponent(i)).setForeground(cliente.getAif().colorEtiqueta().getColorLetras());
 			}
 		}
 	}
-	
+
 	private void cambiarPantallaSeleccion() {
-		CardLayout cl = (CardLayout)(panelPrincipal.getLayout());
-        cl.show(panelPrincipal, "SELLIBRO");
+		CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+		cl.show(panelPrincipal, "SELLIBRO");
 	}
-	
+
 	private JButton getBtnTemaOscuro() {
 		if (btnTemaOscuro == null) {
-			btnTemaOscuro = new JButton("Tema Oscuro");
+			btnTemaOscuro = new JButton("Oscuro");
+			btnTemaOscuro.setFocusable(false);
 			btnTemaOscuro.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					cliente.setAif(new BlackThemeFactory());
@@ -157,19 +184,22 @@ public class MainWindow extends JFrame {
 				}
 			});
 			btnTemaOscuro.setFont(new Font("Tahoma", Font.BOLD, 25));
-			btnTemaOscuro.setBackground(Color.ORANGE);
-			btnTemaOscuro.setBounds(44, 299, 330, 85);
+			btnTemaOscuro.setBackground(new Color(238, 232, 170));
+			btnTemaOscuro.setBounds(244, 239, 126, 111);
 		}
 		return btnTemaOscuro;
 	}
+
 	private JLabel getLblTema() {
 		if (lblTema == null) {
 			lblTema = new JLabel("Elige tema para la interfaz");
-			lblTema.setFont(new Font("Tahoma", Font.BOLD, 25));
-			lblTema.setBounds(48, 44, 360, 34);
+			lblTema.setForeground(new Color(238, 232, 170));
+			lblTema.setFont(new Font("Tahoma", Font.BOLD, 22));
+			lblTema.setBounds(71, 183, 360, 34);
 		}
 		return lblTema;
 	}
+
 	private JPanel getPanelSeleccionFormato() {
 		if (panelSeleccionFormato == null) {
 			panelSeleccionFormato = new JPanel();
@@ -186,6 +216,7 @@ public class MainWindow extends JFrame {
 		}
 		return panelSeleccionFormato;
 	}
+
 	private JLabel getLblSeleccionFormato() {
 		if (lblSeleccionFormato == null) {
 			lblSeleccionFormato = new JLabel("Seleccion de Formato");
@@ -195,6 +226,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblSeleccionFormato;
 	}
+
 	private JRadioButton getRdbtnEbook() {
 		if (rdbtnEbook == null) {
 			rdbtnEbook = new JRadioButton("EBook");
@@ -206,6 +238,7 @@ public class MainWindow extends JFrame {
 		}
 		return rdbtnEbook;
 	}
+
 	private JRadioButton getRdbtnFisico() {
 		if (rdbtnFisico == null) {
 			rdbtnFisico = new JRadioButton("Físico");
@@ -216,6 +249,7 @@ public class MainWindow extends JFrame {
 		}
 		return rdbtnFisico;
 	}
+
 	private JLabel getLblFormato() {
 		if (lblFormato == null) {
 			lblFormato = new JLabel("Elegir formato");
@@ -224,6 +258,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblFormato;
 	}
+
 	private JButton getBtnSiguiente() {
 		if (btnSiguiente == null) {
 			btnSiguiente = new JButton("Siguiente");
@@ -232,79 +267,96 @@ public class MainWindow extends JFrame {
 					asignarFactoriaLibroCliente();
 					crearLibros();
 					cambiarFondoYBotones(getPanelSeleccionEdad());
-					CardLayout cl = (CardLayout)(panelPrincipal.getLayout());
-			        cl.show(panelPrincipal, "SELEDAD");
+					CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+					cl.show(panelPrincipal, "SELEDAD");
 				}
 			});
 			btnSiguiente.setBounds(140, 362, 128, 32);
 		}
 		return btnSiguiente;
 	}
-	
+
 	private void asignarFactoriaLibroCliente() {
 		if (rdbtnEbook.isSelected()) {
 			cliente.setPf(new EBookFactory());
-		}else {
+		} else {
 			cliente.setPf(new PhysicalBookFactory());
 		}
 	}
-	
+
 	private void mostrarPantallaLibro() {
-		CardLayout cl = (CardLayout)(panelPrincipal.getLayout());
+		CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
 		if (rdbtnFisico.isSelected()) {
-            cl.show(panelPrincipal, "LIBROFISICO");
-		}else {
-            cl.show(panelPrincipal, "EBOOK");
+			setDatosPantallaBook();
+			cl.show(panelPrincipal, "LIBROFISICO");
+		} else {
+			setDatosPantallaEBook();
+			cl.show(panelPrincipal, "EBOOK");
 		}
 	}
-	
+
 	private JPanel getPanelLibroFisico() {
 		if (panelLibroFisico == null) {
 			panelLibroFisico = new JPanel();
 			panelLibroFisico.setBackground(Color.WHITE);
 			panelLibroFisico.setLayout(null);
 			panelLibroFisico.add(getLblTituloFisico());
+			panelLibroFisico.add(getLblAutorBook());
+			panelLibroFisico.add(getBtnOtroLibroBook());
+			panelLibroFisico.add(getLblLink());
+			panelLibroFisico.add(getLblEdadRecomendadaFisico());
 		}
 		return panelLibroFisico;
 	}
+
 	private JLabel getLblTituloFisico() {
 		if (lblTituloFisico == null) {
 			lblTituloFisico = new JLabel("Titulo Físico");
+			lblTituloFisico.setHorizontalAlignment(SwingConstants.CENTER);
 			lblTituloFisico.setFont(new Font("Tahoma", Font.BOLD, 16));
-			lblTituloFisico.setBounds(10, 10, 336, 40);
+			lblTituloFisico.setBounds(10, 10, 396, 40);
 		}
 		return lblTituloFisico;
 	}
+
 	private JPanel getPanelEBook() {
 		if (panelEBook == null) {
 			panelEBook = new JPanel();
 			panelEBook.setBackground(Color.WHITE);
 			panelEBook.setLayout(null);
 			panelEBook.add(getLblTituloEbook());
+			panelEBook.add(getLblAutorEbook());
+			panelEBook.add(getBtnOtroLibro());
+			panelEBook.add(getTextAreaTexto());
+			panelEBook.add(getLblEdadRecomendadaEbook());
 		}
 		return panelEBook;
 	}
+
 	private JLabel getLblTituloEbook() {
 		if (lblTituloEbook == null) {
 			lblTituloEbook = new JLabel("Titulo EBook");
+			lblTituloEbook.setHorizontalAlignment(SwingConstants.CENTER);
 			lblTituloEbook.setFont(new Font("Tahoma", Font.BOLD, 16));
-			lblTituloEbook.setBounds(10, 10, 336, 40);
+			lblTituloEbook.setBounds(10, 10, 396, 40);
 		}
 		return lblTituloEbook;
 	}
+
 	private JButton getBtnAtras() {
 		if (btnAtras == null) {
 			btnAtras = new JButton("Atras");
 			btnAtras.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					CardLayout cl = (CardLayout)(panelPrincipal.getLayout());
-			        cl.show(panelPrincipal, "TEMA");
+					CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+					cl.show(panelPrincipal, "TEMA");
 				}
 			});
 			btnAtras.setBounds(140, 406, 128, 32);
 		}
 		return btnAtras;
 	}
+
 	private JLabel getLblEBook() {
 		if (lblEBook == null) {
 			lblEBook = new JLabel("EBook");
@@ -313,6 +365,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblEBook;
 	}
+
 	private JLabel getLblBook() {
 		if (lblBook == null) {
 			lblBook = new JLabel("Book");
@@ -321,6 +374,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblBook;
 	}
+
 	private JPanel getPanelSeleccionEdad() {
 		if (panelSeleccionEdad == null) {
 			panelSeleccionEdad = new JPanel();
@@ -339,6 +393,7 @@ public class MainWindow extends JFrame {
 		}
 		return panelSeleccionEdad;
 	}
+
 	private JLabel getLblEdad_1() {
 		if (lblEdad == null) {
 			lblEdad = new JLabel("Elegir edad");
@@ -347,13 +402,16 @@ public class MainWindow extends JFrame {
 		}
 		return lblEdad;
 	}
+
 	private JRadioButton getRdbtnAdulto() {
 		if (rdbtnAdulto == null) {
 			rdbtnAdulto = new JRadioButton("Adulto");
 			rdbtnAdulto.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					getCbAdulto().setVisible(true);getCbAdulto().setEnabled(true);
-					getCbNiño().setVisible(false);getCbNiño().setEnabled(false);
+					getCbAdulto().setVisible(true);
+					getCbAdulto().setEnabled(true);
+					getCbNiño().setVisible(false);
+					getCbNiño().setEnabled(false);
 				}
 			});
 			buttonGroup_1.add(rdbtnAdulto);
@@ -364,13 +422,16 @@ public class MainWindow extends JFrame {
 		}
 		return rdbtnAdulto;
 	}
+
 	private JRadioButton getRdbtnNiño() {
 		if (rdbtnNiño == null) {
 			rdbtnNiño = new JRadioButton("Niño");
 			rdbtnNiño.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					getCbAdulto().setVisible(false);getCbAdulto().setEnabled(false);
-					getCbNiño().setVisible(true);getCbNiño().setEnabled(true);
+					getCbAdulto().setVisible(false);
+					getCbAdulto().setEnabled(false);
+					getCbNiño().setVisible(true);
+					getCbNiño().setEnabled(true);
 				}
 			});
 			buttonGroup_1.add(rdbtnNiño);
@@ -380,6 +441,7 @@ public class MainWindow extends JFrame {
 		}
 		return rdbtnNiño;
 	}
+
 	private JLabel getLblSeleccionLibro() {
 		if (lblSeleccionLibro == null) {
 			lblSeleccionLibro = new JLabel("Seleccion de Libro");
@@ -389,6 +451,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblSeleccionLibro;
 	}
+
 	private JComboBox<Book> getCbAdulto() {
 		if (cbAdulto == null) {
 			cbAdulto = new JComboBox();
@@ -396,6 +459,7 @@ public class MainWindow extends JFrame {
 		}
 		return cbAdulto;
 	}
+
 	private JComboBox<Book> getCbNiño() {
 		if (cbNiño == null) {
 			cbNiño = new JComboBox();
@@ -411,7 +475,7 @@ public class MainWindow extends JFrame {
 		getCbAdulto().removeAllItems();
 		new InfantilParser(cliente.getPf()).getBooks().stream()
 				.forEach(ibook -> {
-					getCbAdulto().addItem(ibook);
+					getCbNiño().addItem(ibook);
 				});
 
 		new AdultParser(cliente.getPf()).getBooks().stream()
@@ -419,7 +483,7 @@ public class MainWindow extends JFrame {
 					getCbAdulto().addItem(abook);
 				});
 	}
-	
+
 	private JLabel getLblAdulto() {
 		if (lblAdulto == null) {
 			lblAdulto = new JLabel("Adulto");
@@ -428,6 +492,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblAdulto;
 	}
+
 	private JLabel getLblNiño() {
 		if (lblNiño == null) {
 			lblNiño = new JLabel("Niño");
@@ -436,12 +501,14 @@ public class MainWindow extends JFrame {
 		}
 		return lblNiño;
 	}
+
 	private JButton getBtnSiguienteSelLibro() {
 		if (btnSiguienteSelLibro == null) {
 			btnSiguienteSelLibro = new JButton("Siguiente");
 			btnSiguienteSelLibro.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					cambiarFondoYBotones(getPanelEBook());cambiarFondoYBotones(getPanelLibroFisico());
+					cambiarFondoYBotones(getPanelEBook());
+					cambiarFondoYBotones(getPanelLibroFisico());
 					mostrarPantallaLibro();
 				}
 			});
@@ -449,11 +516,179 @@ public class MainWindow extends JFrame {
 		}
 		return btnSiguienteSelLibro;
 	}
+
+	private void setDatosPantallaEBook() {
+		Book libro;
+		if (rdbtnAdulto.isSelected()) {
+			libro = (Book) cbAdulto.getSelectedItem();
+		} else {
+			libro = (Book) cbNiño.getSelectedItem();
+		}
+
+		getLblTituloEbook().setText(libro.getName());
+		getLblAutorEbook().setText(libro.getAutor());
+		getTextAreaTexto().setText(libro.getTexto());
+		getLblEdadRecomendadaEbook().setText("Edad recomendada: " + libro.getEdadMinima());
+	}
+
+	private void setDatosPantallaBook() {
+		Book libro;
+		if (rdbtnAdulto.isSelected()) {
+			libro = (Book) cbAdulto.getSelectedItem();
+		} else {
+			libro = (Book) cbNiño.getSelectedItem();
+		}
+
+		getLblEdadRecomendadaFisico().setText("Edad recomendada: " + libro.getEdadMinima());
+		getLblTituloFisico().setText(libro.getName());
+		getLblAutorBook().setText(libro.getAutor());
+		lblLink.setText("Compra aquí " + libro.getName());
+		if (lblLink.getMouseListeners().length > 0) {
+			lblLink.removeMouseListener(lblLink.getMouseListeners()[0]);
+		}
+
+		lblLink.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				try {
+					Desktop.getDesktop().browse(new URI(libro.getLink()));
+				} catch (IOException | URISyntaxException e1) {
+					e1.printStackTrace();
+				}
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				lblLink.setText("Compra aquí " + libro.getName());
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				lblLink.setText("<html><a href=''>" + "Te redirigiremos a la web de compra" + "</a></html>");
+			}
+
+		});
+	}
+
 	private JButton getBtnAtrasSelLibro() {
 		if (btnAtrasSelLibro == null) {
 			btnAtrasSelLibro = new JButton("Atras");
+			btnAtrasSelLibro.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+					cl.show(panelPrincipal, "SELLIBRO");
+				}
+			});
 			btnAtrasSelLibro.setBounds(145, 412, 128, 32);
 		}
 		return btnAtrasSelLibro;
+	}
+
+	private JLabel getLblAutorEbook() {
+		if (lblAutorEbook == null) {
+			lblAutorEbook = new JLabel("Autor");
+			lblAutorEbook.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lblAutorEbook.setHorizontalAlignment(SwingConstants.CENTER);
+			lblAutorEbook.setBounds(10, 60, 396, 40);
+		}
+		return lblAutorEbook;
+	}
+
+	private JButton getBtnOtroLibro() {
+		if (btnOtroLibro == null) {
+			btnOtroLibro = new JButton("Visualizar otro libro");
+			btnOtroLibro.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+					cl.show(panelPrincipal, "SELEDAD");
+				}
+			});
+			btnOtroLibro.setBounds(10, 424, 396, 40);
+		}
+		return btnOtroLibro;
+	}
+
+	private JTextArea getTextAreaTexto() {
+		if (textAreaTexto == null) {
+			textAreaTexto = new JTextArea();
+			textAreaTexto.setWrapStyleWord(true);
+			textAreaTexto.setLineWrap(true);
+			textAreaTexto.setEditable(false);
+			textAreaTexto.setBounds(10, 141, 396, 267);
+		}
+		return textAreaTexto;
+	}
+
+	private JLabel getLblAutorBook() {
+		if (lblAutorBook == null) {
+			lblAutorBook = new JLabel("Autor");
+			lblAutorBook.setHorizontalAlignment(SwingConstants.CENTER);
+			lblAutorBook.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lblAutorBook.setBounds(10, 60, 396, 40);
+		}
+		return lblAutorBook;
+	}
+
+	private JButton getBtnOtroLibroBook() {
+		if (btnOtroLibroBook == null) {
+			btnOtroLibroBook = new JButton("Visualizar otro libro");
+			btnOtroLibroBook.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+					cl.show(panelPrincipal, "SELEDAD");
+				}
+			});
+			btnOtroLibroBook.setBounds(10, 424, 396, 40);
+		}
+		return btnOtroLibroBook;
+	}
+
+	private JLabel getLblLink() {
+		if (lblLink == null) {
+			lblLink = new JLabel("Link");
+			lblLink.setHorizontalAlignment(SwingConstants.CENTER);
+			lblLink.setBounds(10, 152, 396, 26);
+		}
+		return lblLink;
+	}
+
+	private JLabel getLblNombreAplicacion() {
+		if (lblNombreAplicacion == null) {
+			lblNombreAplicacion = new JLabel("LibroVisión");
+			lblNombreAplicacion.setForeground(new Color(240, 230, 140));
+			lblNombreAplicacion.setFont(new Font("Tahoma", Font.BOLD, 30));
+			lblNombreAplicacion.setBounds(136, 91, 268, 34);
+		}
+		return lblNombreAplicacion;
+	}
+
+	private JLabel getLblFondo() {
+		if (lblFondo == null) {
+			lblFondo = new JLabel("");
+			lblFondo.setIcon(new ImageIcon(MainWindow.class.getResource("/gui/img/libroFondo.png")));
+			lblFondo.setBounds(0, 0, 416, 474);
+		}
+		return lblFondo;
+	}
+
+	private JLabel getLblEdadRecomendadaEbook() {
+		if (lblEdadRecomendadaEbook == null) {
+			lblEdadRecomendadaEbook = new JLabel("Edad Recomendada");
+			lblEdadRecomendadaEbook.setHorizontalAlignment(SwingConstants.CENTER);
+			lblEdadRecomendadaEbook.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lblEdadRecomendadaEbook.setBounds(110, 95, 204, 24);
+		}
+		return lblEdadRecomendadaEbook;
+	}
+
+	private JLabel getLblEdadRecomendadaFisico() {
+		if (lblEdadRecomendadaFisico == null) {
+			lblEdadRecomendadaFisico = new JLabel("Edad Recomendada");
+			lblEdadRecomendadaFisico.setHorizontalAlignment(SwingConstants.CENTER);
+			lblEdadRecomendadaFisico.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lblEdadRecomendadaFisico.setBounds(110, 110, 204, 24);
+		}
+		return lblEdadRecomendadaFisico;
 	}
 }
