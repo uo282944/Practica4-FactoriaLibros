@@ -1,5 +1,4 @@
 package gui;
-
 import Interfaz.AbstractInterfaceFactory;
 import Libro.PlatformFactory;
 

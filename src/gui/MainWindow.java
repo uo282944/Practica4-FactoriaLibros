@@ -12,6 +12,8 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -26,6 +28,8 @@ import Interfaz.LightThemeFactory;
 import Libro.Book;
 import Libro.EBookFactory;
 import Libro.PhysicalBookFactory;
+import parse.AdultParser;
+import parse.InfantilParser;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
@@ -51,7 +55,7 @@ public class MainWindow extends JFrame {
 	private JLabel lblTituloFisico;
 	private JPanel panelEBook;
 	private JLabel lblTituloEbook;
-	
+
 	private Cliente cliente;
 	private JButton btnAtras;
 	private JLabel lblEBook;
@@ -101,7 +105,7 @@ public class MainWindow extends JFrame {
 	public MainWindow() {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/gui/img/libro.png")));
 		cliente = new Cliente();
-		
+
 		setTitle("Visualizador de libros");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -131,6 +135,7 @@ public class MainWindow extends JFrame {
 		}
 		return panelSeleccionTema;
 	}
+
 	private JButton getBtnTemaClaro() {
 		if (btnTemaClaro == null) {
 			btnTemaClaro = new JButton("Claro");
@@ -149,24 +154,24 @@ public class MainWindow extends JFrame {
 		}
 		return btnTemaClaro;
 	}
-	
+
 	private void cambiarFondoYBotones(JPanel panel) {
 		panel.setBackground(cliente.getAif().colorFondo().getColorFondo());
-		for (int i = 0;i< panel.getComponents().length;i++) {
+		for (int i = 0; i < panel.getComponents().length; i++) {
 			if (panel.getComponent(i) instanceof JButton) {
-				((JButton)panel.getComponent(i)).setBackground(cliente.getAif().colorBoton().getColorFondoBoton());
-				((JButton)panel.getComponent(i)).setForeground(cliente.getAif().colorBoton().getColorLetras());
-			}else if(panel.getComponent(i) instanceof JLabel){
-				((JLabel)panel.getComponent(i)).setForeground(cliente.getAif().colorEtiqueta().getColorLetras());
+				((JButton) panel.getComponent(i)).setBackground(cliente.getAif().colorBoton().getColorFondoBoton());
+				((JButton) panel.getComponent(i)).setForeground(cliente.getAif().colorBoton().getColorLetras());
+			} else if (panel.getComponent(i) instanceof JLabel) {
+				((JLabel) panel.getComponent(i)).setForeground(cliente.getAif().colorEtiqueta().getColorLetras());
 			}
 		}
 	}
-	
+
 	private void cambiarPantallaSeleccion() {
-		CardLayout cl = (CardLayout)(panelPrincipal.getLayout());
-        cl.show(panelPrincipal, "SELLIBRO");
+		CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+		cl.show(panelPrincipal, "SELLIBRO");
 	}
-	
+
 	private JButton getBtnTemaOscuro() {
 		if (btnTemaOscuro == null) {
 			btnTemaOscuro = new JButton("Oscuro");
@@ -184,6 +189,7 @@ public class MainWindow extends JFrame {
 		}
 		return btnTemaOscuro;
 	}
+
 	private JLabel getLblTema() {
 		if (lblTema == null) {
 			lblTema = new JLabel("Elige tema para la interfaz");
@@ -193,6 +199,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblTema;
 	}
+
 	private JPanel getPanelSeleccionFormato() {
 		if (panelSeleccionFormato == null) {
 			panelSeleccionFormato = new JPanel();
@@ -209,6 +216,7 @@ public class MainWindow extends JFrame {
 		}
 		return panelSeleccionFormato;
 	}
+
 	private JLabel getLblSeleccionFormato() {
 		if (lblSeleccionFormato == null) {
 			lblSeleccionFormato = new JLabel("Seleccion de Formato");
@@ -218,6 +226,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblSeleccionFormato;
 	}
+
 	private JRadioButton getRdbtnEbook() {
 		if (rdbtnEbook == null) {
 			rdbtnEbook = new JRadioButton("EBook");
@@ -229,6 +238,7 @@ public class MainWindow extends JFrame {
 		}
 		return rdbtnEbook;
 	}
+
 	private JRadioButton getRdbtnFisico() {
 		if (rdbtnFisico == null) {
 			rdbtnFisico = new JRadioButton("Físico");
@@ -239,6 +249,7 @@ public class MainWindow extends JFrame {
 		}
 		return rdbtnFisico;
 	}
+
 	private JLabel getLblFormato() {
 		if (lblFormato == null) {
 			lblFormato = new JLabel("Elegir formato");
@@ -247,42 +258,43 @@ public class MainWindow extends JFrame {
 		}
 		return lblFormato;
 	}
+
 	private JButton getBtnSiguiente() {
 		if (btnSiguiente == null) {
 			btnSiguiente = new JButton("Siguiente");
 			btnSiguiente.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					asignarFactoriaLibroCliente();
-					crearLibrosAdulto();crearLibrosNiño();
+					crearLibros();
 					cambiarFondoYBotones(getPanelSeleccionEdad());
-					CardLayout cl = (CardLayout)(panelPrincipal.getLayout());
-			        cl.show(panelPrincipal, "SELEDAD");
+					CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+					cl.show(panelPrincipal, "SELEDAD");
 				}
 			});
 			btnSiguiente.setBounds(140, 362, 128, 32);
 		}
 		return btnSiguiente;
 	}
-	
+
 	private void asignarFactoriaLibroCliente() {
 		if (rdbtnEbook.isSelected()) {
 			cliente.setPf(new EBookFactory());
-		}else {
+		} else {
 			cliente.setPf(new PhysicalBookFactory());
 		}
 	}
-	
+
 	private void mostrarPantallaLibro() {
-		CardLayout cl = (CardLayout)(panelPrincipal.getLayout());
+		CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
 		if (rdbtnFisico.isSelected()) {
 			setDatosPantallaBook();
-            cl.show(panelPrincipal, "LIBROFISICO");
-		}else {
+			cl.show(panelPrincipal, "LIBROFISICO");
+		} else {
 			setDatosPantallaEBook();
-            cl.show(panelPrincipal, "EBOOK");
+			cl.show(panelPrincipal, "EBOOK");
 		}
 	}
-	
+
 	private JPanel getPanelLibroFisico() {
 		if (panelLibroFisico == null) {
 			panelLibroFisico = new JPanel();
@@ -296,6 +308,7 @@ public class MainWindow extends JFrame {
 		}
 		return panelLibroFisico;
 	}
+
 	private JLabel getLblTituloFisico() {
 		if (lblTituloFisico == null) {
 			lblTituloFisico = new JLabel("Titulo Físico");
@@ -305,6 +318,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblTituloFisico;
 	}
+
 	private JPanel getPanelEBook() {
 		if (panelEBook == null) {
 			panelEBook = new JPanel();
@@ -318,6 +332,7 @@ public class MainWindow extends JFrame {
 		}
 		return panelEBook;
 	}
+
 	private JLabel getLblTituloEbook() {
 		if (lblTituloEbook == null) {
 			lblTituloEbook = new JLabel("Titulo EBook");
@@ -327,19 +342,21 @@ public class MainWindow extends JFrame {
 		}
 		return lblTituloEbook;
 	}
+
 	private JButton getBtnAtras() {
 		if (btnAtras == null) {
 			btnAtras = new JButton("Atras");
 			btnAtras.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					CardLayout cl = (CardLayout)(panelPrincipal.getLayout());
-			        cl.show(panelPrincipal, "TEMA");
+					CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+					cl.show(panelPrincipal, "TEMA");
 				}
 			});
 			btnAtras.setBounds(140, 406, 128, 32);
 		}
 		return btnAtras;
 	}
+
 	private JLabel getLblEBook() {
 		if (lblEBook == null) {
 			lblEBook = new JLabel("EBook");
@@ -348,6 +365,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblEBook;
 	}
+
 	private JLabel getLblBook() {
 		if (lblBook == null) {
 			lblBook = new JLabel("Book");
@@ -356,6 +374,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblBook;
 	}
+
 	private JPanel getPanelSeleccionEdad() {
 		if (panelSeleccionEdad == null) {
 			panelSeleccionEdad = new JPanel();
@@ -374,6 +393,7 @@ public class MainWindow extends JFrame {
 		}
 		return panelSeleccionEdad;
 	}
+
 	private JLabel getLblEdad_1() {
 		if (lblEdad == null) {
 			lblEdad = new JLabel("Elegir edad");
@@ -382,13 +402,16 @@ public class MainWindow extends JFrame {
 		}
 		return lblEdad;
 	}
+
 	private JRadioButton getRdbtnAdulto() {
 		if (rdbtnAdulto == null) {
 			rdbtnAdulto = new JRadioButton("Adulto");
 			rdbtnAdulto.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					getCbAdulto().setVisible(true);getCbAdulto().setEnabled(true);
-					getCbNiño().setVisible(false);getCbNiño().setEnabled(false);
+					getCbAdulto().setVisible(true);
+					getCbAdulto().setEnabled(true);
+					getCbNiño().setVisible(false);
+					getCbNiño().setEnabled(false);
 				}
 			});
 			buttonGroup_1.add(rdbtnAdulto);
@@ -399,13 +422,16 @@ public class MainWindow extends JFrame {
 		}
 		return rdbtnAdulto;
 	}
+
 	private JRadioButton getRdbtnNiño() {
 		if (rdbtnNiño == null) {
 			rdbtnNiño = new JRadioButton("Niño");
 			rdbtnNiño.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					getCbAdulto().setVisible(false);getCbAdulto().setEnabled(false);
-					getCbNiño().setVisible(true);getCbNiño().setEnabled(true);
+					getCbAdulto().setVisible(false);
+					getCbAdulto().setEnabled(false);
+					getCbNiño().setVisible(true);
+					getCbNiño().setEnabled(true);
 				}
 			});
 			buttonGroup_1.add(rdbtnNiño);
@@ -415,6 +441,7 @@ public class MainWindow extends JFrame {
 		}
 		return rdbtnNiño;
 	}
+
 	private JLabel getLblSeleccionLibro() {
 		if (lblSeleccionLibro == null) {
 			lblSeleccionLibro = new JLabel("Seleccion de Libro");
@@ -424,6 +451,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblSeleccionLibro;
 	}
+
 	private JComboBox<Book> getCbAdulto() {
 		if (cbAdulto == null) {
 			cbAdulto = new JComboBox();
@@ -431,6 +459,7 @@ public class MainWindow extends JFrame {
 		}
 		return cbAdulto;
 	}
+
 	private JComboBox<Book> getCbNiño() {
 		if (cbNiño == null) {
 			cbNiño = new JComboBox();
@@ -440,33 +469,21 @@ public class MainWindow extends JFrame {
 		}
 		return cbNiño;
 	}
-	
-	private void crearLibrosAdulto() {
-		Book b1 = cliente.getPf().buyAdultBook("Don Quijote de la Mancha", "Miguel de Cervantes Saavedra", "Parte 1, Capítulo 22\n\n″Cuanto más, que desnudo nací, desnudo me hallo: ni pierdo ni gano».",
-				"https://www.amazon.es/Don-Quijote-Mancha-Libro/s?k=Don+Quijote+de+la+Mancha+Libro");
-		Book b2 = cliente.getPf().buyAdultBook("La Celestina","Fernando de Rojas","Acto 1, Escena 1\n\nCALISTO, que ha conocido a MELIBEA en su jardín, donde su halcón se refugió un día antes al escaparse, se imagina en sueños que está frente a su amada, enamorándola. Ambos jóvenes se hallan en el mismo jardín en el que se conocieron. MELIBEA está de pie; CALISTO, rendido a sus plantas.",
-				"https://www.amazon.es/Celestina-Libros/s?k=La+Celestina&rh=n%3A599364031");
-		getCbAdulto().removeAllItems();
-		getCbAdulto().addItem(b1);getCbAdulto().addItem(b2);
-	}
-	
-	private void crearLibrosNiño() {
-		Book b1 = cliente.getPf().buyChildBook("El Monstruo de Colores", "Anna Llenas", "Este es el monstruo de\r\n"
-				+ "colores.\r\n"
-				+ "Hoy se ha levantado raro,\r\n"
-				+ "confuso, aturdido…\r\n"
-				+ "No sabe muy bien qué le pasa.",
-				"https://www.amazon.es/monstruo-colores-edici%C3%B3n-ilustrado-flamboyant/dp/8493987743");
-		Book b2 = cliente.getPf().buyChildBook("El pollo Pepe","Nick Denchfield","El pollo Pepe come mucha cebada, por eso la barriga la tiene hinchada.\r\n"
-				+ "Pollo Pepe no comas tanto... que te pones malito y no das ni un salto.\r\n"
-				+ "El pollo Pepe come granos de trigo, los mete a puñados en su gran pico.\r\n"
-				+ "Pollo Pepe no comas tanto.... que te pones malito y no das ni un salto.", 
-				"https://www.amazon.es/El-pollo-Pepe-sus-amigos/dp/8434856816");
+
+	private void crearLibros(){
 		getCbNiño().removeAllItems();
-		
-		getCbNiño().addItem(b1);getCbNiño().addItem(b2);
+		getCbAdulto().removeAllItems();
+		new InfantilParser(cliente.getPf()).getBooks().stream()
+				.forEach(ibook -> {
+					getCbNiño().addItem(ibook);
+				});
+
+		new AdultParser(cliente.getPf()).getBooks().stream()
+				.forEach(abook -> {
+					getCbAdulto().addItem(abook);
+				});
 	}
-	
+
 	private JLabel getLblAdulto() {
 		if (lblAdulto == null) {
 			lblAdulto = new JLabel("Adulto");
@@ -475,6 +492,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblAdulto;
 	}
+
 	private JLabel getLblNiño() {
 		if (lblNiño == null) {
 			lblNiño = new JLabel("Niño");
@@ -483,12 +501,14 @@ public class MainWindow extends JFrame {
 		}
 		return lblNiño;
 	}
+
 	private JButton getBtnSiguienteSelLibro() {
 		if (btnSiguienteSelLibro == null) {
 			btnSiguienteSelLibro = new JButton("Siguiente");
 			btnSiguienteSelLibro.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					cambiarFondoYBotones(getPanelEBook());cambiarFondoYBotones(getPanelLibroFisico());
+					cambiarFondoYBotones(getPanelEBook());
+					cambiarFondoYBotones(getPanelLibroFisico());
 					mostrarPantallaLibro();
 				}
 			});
@@ -496,74 +516,75 @@ public class MainWindow extends JFrame {
 		}
 		return btnSiguienteSelLibro;
 	}
-	
+
 	private void setDatosPantallaEBook() {
 		Book libro;
 		if (rdbtnAdulto.isSelected()) {
 			libro = (Book) cbAdulto.getSelectedItem();
-		}else {
+		} else {
 			libro = (Book) cbNiño.getSelectedItem();
 		}
-		
+
 		getLblTituloEbook().setText(libro.getName());
 		getLblAutorEbook().setText(libro.getAutor());
 		getTextAreaTexto().setText(libro.getTexto());
-		getLblEdadRecomendadaEbook().setText("Edad recomendada: "+libro.getEdadMinima());
+		getLblEdadRecomendadaEbook().setText("Edad recomendada: " + libro.getEdadMinima());
 	}
-	
+
 	private void setDatosPantallaBook() {
 		Book libro;
 		if (rdbtnAdulto.isSelected()) {
 			libro = (Book) cbAdulto.getSelectedItem();
-		}else {
+		} else {
 			libro = (Book) cbNiño.getSelectedItem();
 		}
-		
-		getLblEdadRecomendadaFisico().setText("Edad recomendada: "+libro.getEdadMinima());
+
+		getLblEdadRecomendadaFisico().setText("Edad recomendada: " + libro.getEdadMinima());
 		getLblTituloFisico().setText(libro.getName());
 		getLblAutorBook().setText(libro.getAutor());
 		lblLink.setText("Compra aquí " + libro.getName());
 		if (lblLink.getMouseListeners().length > 0) {
 			lblLink.removeMouseListener(lblLink.getMouseListeners()[0]);
 		}
-		
+
 		lblLink.addMouseListener(new MouseAdapter() {
-			 
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                try {
-                    Desktop.getDesktop().browse(new URI(libro.getLink()));
-                } catch (IOException | URISyntaxException e1) {
-                    e1.printStackTrace();
-                }
-            }
- 
-            @Override
-            public void mouseExited(MouseEvent e) {
-            	lblLink.setText("Compra aquí " + libro.getName());
-            }
- 
-            @Override
-            public void mouseEntered(MouseEvent e) {
-            	lblLink.setText("<html><a href=''>" + "Te redirigiremos a la web de compra" + "</a></html>");
-            }
- 
-        });
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				try {
+					Desktop.getDesktop().browse(new URI(libro.getLink()));
+				} catch (IOException | URISyntaxException e1) {
+					e1.printStackTrace();
+				}
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				lblLink.setText("Compra aquí " + libro.getName());
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				lblLink.setText("<html><a href=''>" + "Te redirigiremos a la web de compra" + "</a></html>");
+			}
+
+		});
 	}
-	
+
 	private JButton getBtnAtrasSelLibro() {
 		if (btnAtrasSelLibro == null) {
 			btnAtrasSelLibro = new JButton("Atras");
 			btnAtrasSelLibro.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					CardLayout cl = (CardLayout)(panelPrincipal.getLayout());
-			        cl.show(panelPrincipal, "SELLIBRO");
+					CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+					cl.show(panelPrincipal, "SELLIBRO");
 				}
 			});
 			btnAtrasSelLibro.setBounds(145, 412, 128, 32);
 		}
 		return btnAtrasSelLibro;
 	}
+
 	private JLabel getLblAutorEbook() {
 		if (lblAutorEbook == null) {
 			lblAutorEbook = new JLabel("Autor");
@@ -573,19 +594,21 @@ public class MainWindow extends JFrame {
 		}
 		return lblAutorEbook;
 	}
+
 	private JButton getBtnOtroLibro() {
 		if (btnOtroLibro == null) {
 			btnOtroLibro = new JButton("Visualizar otro libro");
 			btnOtroLibro.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					CardLayout cl = (CardLayout)(panelPrincipal.getLayout());
-			        cl.show(panelPrincipal, "SELEDAD");
+					CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+					cl.show(panelPrincipal, "SELEDAD");
 				}
 			});
 			btnOtroLibro.setBounds(10, 424, 396, 40);
 		}
 		return btnOtroLibro;
 	}
+
 	private JTextArea getTextAreaTexto() {
 		if (textAreaTexto == null) {
 			textAreaTexto = new JTextArea();
@@ -596,6 +619,7 @@ public class MainWindow extends JFrame {
 		}
 		return textAreaTexto;
 	}
+
 	private JLabel getLblAutorBook() {
 		if (lblAutorBook == null) {
 			lblAutorBook = new JLabel("Autor");
@@ -605,19 +629,21 @@ public class MainWindow extends JFrame {
 		}
 		return lblAutorBook;
 	}
+
 	private JButton getBtnOtroLibroBook() {
 		if (btnOtroLibroBook == null) {
 			btnOtroLibroBook = new JButton("Visualizar otro libro");
 			btnOtroLibroBook.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					CardLayout cl = (CardLayout)(panelPrincipal.getLayout());
-			        cl.show(panelPrincipal, "SELEDAD");
+					CardLayout cl = (CardLayout) (panelPrincipal.getLayout());
+					cl.show(panelPrincipal, "SELEDAD");
 				}
 			});
 			btnOtroLibroBook.setBounds(10, 424, 396, 40);
 		}
 		return btnOtroLibroBook;
 	}
+
 	private JLabel getLblLink() {
 		if (lblLink == null) {
 			lblLink = new JLabel("Link");
@@ -626,6 +652,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblLink;
 	}
+
 	private JLabel getLblNombreAplicacion() {
 		if (lblNombreAplicacion == null) {
 			lblNombreAplicacion = new JLabel("LibroVisión");
@@ -635,6 +662,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblNombreAplicacion;
 	}
+
 	private JLabel getLblFondo() {
 		if (lblFondo == null) {
 			lblFondo = new JLabel("");
@@ -643,6 +671,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblFondo;
 	}
+
 	private JLabel getLblEdadRecomendadaEbook() {
 		if (lblEdadRecomendadaEbook == null) {
 			lblEdadRecomendadaEbook = new JLabel("Edad Recomendada");
@@ -652,6 +681,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblEdadRecomendadaEbook;
 	}
+
 	private JLabel getLblEdadRecomendadaFisico() {
 		if (lblEdadRecomendadaFisico == null) {
 			lblEdadRecomendadaFisico = new JLabel("Edad Recomendada");
