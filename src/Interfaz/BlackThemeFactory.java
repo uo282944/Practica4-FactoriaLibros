@@ -1,7 +1,5 @@
 package Interfaz;
 
-import java.util.List;
-
 public class BlackThemeFactory implements AbstractInterfaceFactory {
 
     @Override
