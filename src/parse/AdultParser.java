@@ -16,7 +16,7 @@ public class AdultParser extends Parser{
     }
 
     public Book createBook(String[] bookData) {
-        return new PhysicalBookFactory().showChildBook(
+        return pf.showAdultBook(
                 bookData[Atributes.TITULO.ordinal()],
                 bookData[Atributes.AUTOR.ordinal()],
                 bookData[Atributes.TEXTO.ordinal()],
